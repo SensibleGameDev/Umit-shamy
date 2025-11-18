@@ -1,16 +1,26 @@
 import sqlite3
 import requests # DeepSeek-пен байланысу үшін қажет
+import smtplib # Email жіберу үшін
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from flask import Flask, render_template, request, redirect, url_for, g, jsonify
 
 app = Flask(__name__)
 DATABASE = 'hope_light.db'
 
 
-DEEPSEEK_API_KEY = "sk-71f366ac9de246808f01f673a48514ba" # Осы жерге 'sk-...' деп басталатын кілтті қойыңыз
+DEEPSEEK_API_KEY = "sk-71f366ac9de246808f01f673a48514ba" 
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SENDER_EMAIL = "qplayzx@gmail.com"      
+SENDER_PASSWORD = "glym xpcw lujs zsqa"     
+PSYCHOLOGIST_EMAIL = "umsyn-bolatovna-777@mail.ru" 
+
+
+
 def get_db():
-    """Деректер қорына қосылу"""
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
@@ -35,12 +45,48 @@ def init_db_command():
     init_db()
     print('Деректер қоры инициализацияланды.')
 
-# --- Негізгі беттер (Routes) ---
-# ... (Бұрынғы route-тар: index, emotional_support, psychological_support, support_wall және т.б. өзгеріссіз қалады) ...
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/urgent-help', methods=['GET', 'POST'])
+def urgent_help():
+    
+    if request.method == 'POST':
+        message_body = request.form['message']
+        
+      
+        try:
+          
+            msg = MIMEMultipart()
+            msg['From'] = SENDER_EMAIL
+            msg['To'] = PSYCHOLOGIST_EMAIL
+            msg['Subject'] = "SOS: ОҚУШЫҒА ЖЕДЕЛ КӨМЕК ҚАЖЕТ! (Аноним)"
+            
+            body = f"Сайттан анонимді SOS хабарлама келді:\n\nХабарлама: {message_body}\n\n---\nБұл автоматты хабарлама."
+            msg.attach(MIMEText(body, 'plain'))
+            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+            server.starttls() # Қауіпсіз байланыс
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            text = msg.as_string()
+            server.sendmail(SENDER_EMAIL, PSYCHOLOGIST_EMAIL, text)
+            server.quit()
+            
+            return redirect(url_for('urgent_success'))
+            
+        except Exception as e:
+            print(f"Email Error: {e}")
+    
+            return render_template('urgent_error.html', error=str(e))
+
+    return render_template('urgent_help.html')
+
+@app.route('/urgent-success')
+def urgent_success():
+    return render_template('urgent_success.html')
+
 
 @app.route('/emotional-support')
 def emotional_support():
@@ -114,22 +160,18 @@ def appointment():
 def appointment_success():
     return render_template('appointment_success.html')
 
-# --- ЖАҢА ROUTE: Чат-бот API ---
 @app.route('/api/chat', methods=['POST'])
 def chat_api():
+    # ... (DeepSeek чат коды өзгеріссіз қалады) ...
     data = request.json
     user_message = data.get('message')
-
     if not user_message:
         return jsonify({'error': 'Хабарлама бос'}), 400
 
-    # DeepSeek API-ге сұраныс дайындау
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
     }
-
-    # Боттың "мінез-құлқын" баптау (System Prompt)
     system_prompt = """
     Сенің атың - "Үміт". Сен мектеп оқушыларына арналған эмоциялық қолдау сайтындағы виртуалды көмекшісің.
     Тілің: Қазақ тілі.
@@ -138,27 +180,24 @@ def chat_api():
     Маңызды ереже: Егер оқушы өзіне қол жұмсау (суицид) немесе ауыр депрессия туралы айтса, бірден мектеп психологына баруға кеңес бер және оны жалғыз қалдырмауға тырыс.
     Жауаптарың тым ұзын болмасын, оқушыға жеңіл болсын.
     """
-
     payload = {
-        "model": "deepseek-chat", # DeepSeek моделі
+        "model": "deepseek-chat",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message}
         ],
         "stream": False
     }
-
     try:
         response = requests.post(DEEPSEEK_URL, headers=headers, json=payload)
-        response.raise_for_status() # Қате болса хабарлау
-        
+        if response.status_code != 200:
+            print(f"DeepSeek API Error: {response.status_code}")
+        response.raise_for_status()
         api_data = response.json()
         bot_reply = api_data['choices'][0]['message']['content']
-        
         return jsonify({'reply': bot_reply})
-    
     except Exception as e:
-        print(f"API Error: {e}")
+        print(f"Жалпы қате: {e}")
         return jsonify({'reply': 'Кешіріңіз, қазір байланыс нашар болып тұр. Біраздан соң қайта жазып көріңізші. ❤️'}), 500
 
 if __name__ == '__main__':
