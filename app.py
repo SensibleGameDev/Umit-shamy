@@ -4,7 +4,7 @@ import smtplib # Email жіберу үшін
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, render_template, request, redirect, url_for, g, jsonify
-
+import threading
 app = Flask(__name__)
 DATABASE = 'hope_light.db'
 
@@ -67,13 +67,23 @@ def urgent_help():
             
             body = f"Сайттан анонимді SOS хабарлама келді:\n\nХабарлама: {message_body}\n\n---\nБұл автоматты хабарлама."
             msg.attach(MIMEText(body, 'plain'))
-            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-            #server.starttls() # Қауіпсіз байланыс
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            text = msg.as_string()
-            server.sendmail(SENDER_EMAIL, PSYCHOLOGIST_EMAIL, text)
-            server.quit()
+            def send_async_email(msg_obj):
+                try:
+                    # Используем SSL и порт 465 (самый надежный вариант)
+                    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+                    server.login(SENDER_EMAIL, SENDER_PASSWORD)
+                    server.sendmail(SENDER_EMAIL, PSYCHOLOGIST_EMAIL, msg_obj.as_string())
+                    server.quit()
+                    print("Письмо успешно отправлено в фоне.")
+                except Exception as e:
+                    print(f"Ошибка при отправке письма: {e}")
+
+            # Запускаем отправку в отдельном потоке
+            email_thread = threading.Thread(target=send_async_email, args=(msg,))
+            email_thread.start()
+            # --- КОНЕЦ ИСПРАВЛЕНИЯ ---
             
+            # Сразу перенаправляем пользователя, не дожидаясь отправки
             return redirect(url_for('urgent_success'))
             
         except Exception as e:
@@ -202,4 +212,5 @@ def chat_api():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
