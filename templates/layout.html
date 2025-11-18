@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Үміт шамы</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Үміт шамы лого" class="logo-img">
+                <span>Үміт шамы</span>
+            </a>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Басты бет</a></li>
+                <li><a href="{{ url_for('emotional_support') }}">Эмоциялық қолдау</a></li>
+                <li><a href="{{ url_for('support_wall') }}">Қолдау қабырғасы</a></li>
+                <li><a href="{{ url_for('psychological_support') }}">Психологиялық қолдау</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- --- ЧАТ-БОТ ВИДЖЕТІ --- -->
+    <button id="chat-toggle-btn" class="chat-toggle-btn">
+        💬 Көмекші "Үміт"
+    </button>
+
+    <div id="chat-widget" class="chat-widget hidden">
+        <div class="chat-header">
+            <div class="chat-title">
+                <span>🤖 Үміт</span>
+                <small>Виртуалды көмекші</small>
+            </div>
+            <button id="chat-close-btn" class="chat-close-btn">&times;</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <div class="message bot-message">
+                Сәлем! Менің атым - Үміт. Саған қалай көмектесе аламын? Көңіл-күйің қалай?
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Хабарлама жазыңыз..." autocomplete="off">
+            <button id="chat-send-btn">➤</button>
+        </div>
+    </div>
+    <!-- --- ЧАТ-БОТ АЯҚТАЛДЫ --- -->
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 "Үміт шамы" - Оқушыларға арналған қолдау платформасы.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        const toggleBtn = document.getElementById('chat-toggle-btn');
+        const closeBtn = document.getElementById('chat-close-btn');
+        const chatWidget = document.getElementById('chat-widget');
+        const sendBtn = document.getElementById('chat-send-btn');
+        const chatInput = document.getElementById('chat-input');
+        const messagesContainer = document.getElementById('chat-messages');
+
+        // Чатты ашу/жабу
+        toggleBtn.addEventListener('click', () => {
+            chatWidget.classList.remove('hidden');
+            toggleBtn.classList.add('hidden');
+            chatInput.focus();
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatWidget.classList.add('hidden');
+            toggleBtn.classList.remove('hidden');
+        });
+
+        // Хабарлама қосу функциясы
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+            div.textContent = text;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Төменге айналдыру
+        }
+
+        // Хабарлама жіберу
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // 1. Пайдаланушы хабарламасын көрсету
+            addMessage(text, 'user');
+            chatInput.value = '';
+            chatInput.disabled = true; // Жауап келгенше бұғаттау
+
+            // "Жазып жатыр..." индикаторын қосуға болады (опционалды)
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message', 'bot-message', 'loading');
+            loadingDiv.textContent = '...';
+            messagesContainer.appendChild(loadingDiv);
+
+            try {
+                // 2. Серверге (API) жіберу
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                
+                // Loading-ді өшіру
+                messagesContainer.removeChild(loadingDiv);
+
+                // 3. Бот жауабын көрсету
+                if (data.reply) {
+                    addMessage(data.reply, 'bot');
+                } else {
+                    addMessage('Қате шықты.', 'bot');
+                }
+
+            } catch (error) {
+                messagesContainer.removeChild(loadingDiv);
+                addMessage('Байланыс қатесі. Қайта көріңіз.', 'bot');
+            } finally {
+                chatInput.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

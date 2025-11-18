@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}Психологқа жазылу{% endblock %}
+
+{% block content %}
+    <h1>Психологқа жазылу</h1>
+    <p>Егер сізге жеке кеңес қажет болса, төмендегі форманы толтырыңыз. Біздің мамандар сізбен байланысқа шығады.</p>
+    <p><strong>Барлық ақпарат құпия сақталады.</strong></p>
+
+    <form method="post" class="card-form">
+        <label for="student_name">Аты-жөніңіз (немесе лақап атыңыз):</label>
+        <input type="text" name="student_name" id="student_name" required>
+
+        <label for="contact_info">Байланыс ақпараты (Email, Telegram @username, т.б.):</label>
+        <input type="text" name="contact_info" id="contact_info" placeholder="Сізбен қалай байланыссақ болады?" required>
+
+        <label for="preferred_time">Сізге ыңғайлы уақыт:</label>
+        <input type="text" name="preferred_time" id="preferred_time" placeholder="Мысалы: 'Ертең сағат 15:00-ден кейін' немесе 'Кез келген уақытта'">
+
+        <button type="submit" class="cta-button">Өтініш жіберу</button>
+    </form>
+{% endblock %}

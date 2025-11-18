@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block title %}Қолдау қабырғасы{% endblock %}
+
+{% block content %}
+    <h1>Қолдау қабырғасы</h1>
+    <p>Мұнда сіз басқа оқушылармен ойыңызбен бөлісе аласыз. Бір-бірімізге қолдау көрсетейік!</p>
+
+    <form method="post" class="card-form">
+        <label for="author_name">Атыңыз (Міндетті емес):</label>
+        <input type="text" name="author_name" id="author_name" placeholder="Аноним болып қалуыңызға болады">
+
+        <label for="post_text">Айтар ойыңыз немесе қолдау сөзіңіз:</label>
+        <textarea name="post_text" id="post_text" rows="4" placeholder="Жүрегіңізді не мазалайды немесе кімге қолдау білдіргіңіз келеді?" required></textarea>
+
+        <button type="submit" class="cta-button">Жіберу</button>
+    </form>
+
+    <hr>
+
+    <h2>Барлық жазбалар</h2>
+    <div class="post-list">
+        {% if not posts %}
+            <p>Әзірге ешкім жазба қалдырмапты. Бірінші болыңыз!</p>
+        {% endif %}
+        {% for post in posts %}
+            <div class="post-item">
+                <div class="post-header">
+                    <strong>{{ post['author_name'] }}</strong>
+                    <small>{{ post['created_at'].split(' ')[0] }}</small>
+                </div>
+                <div class="post-body">
+                    <p>{{ post['post_text'] }}</p>
+                </div>
+                <div class="post-footer">
+                    <!-- "Шам жағу" батырмасы -->
+                    <form action="{{ url_for('light_candle', post_id=post['id']) }}" method="post" class="candle-form">
+                        <button type="submit" class="candle-button">
+                            🔥 Шам жағу ({{ post['candle_count'] }})
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+{% block title %}Көңіл-күй күнделігі{% endblock %}
+
+{% block content %}
+    <h1>Көңіл-күй күнделігі</h1>
+    <p>Бүгін өзіңізді қалай сезінесіз?</p>
+
+    <form method="post" class="card-form">
+        <label for="mood">Көңіл-күйіңізді таңдаңыз:</label>
+        <select name="mood" id="mood" required>
+            <option value="👍 Керемет">👍 Керемет</option>
+            <option value="😊 Жақсы">😊 Жақсы</option>
+            <option value="😐 Орташа">😐 Орташа</option>
+            <option value="😔 Нашар">😔 Нашар</option>
+            <option value="😢 Өте жаман">😢 Өте жаман</option>
+        </select>
+
+        <label for="notes">Ойыңызбен бөлісіңіз (міндетті емес):</label>
+        <textarea name="notes" id="notes" rows="4" placeholder="Не болды? Не ойладыңыз?"></textarea>
+
+        <button type="submit" class="cta-button">Сақтау</button>
+    </form>
+
+    <hr>
+
+    <h2>Менің жазбаларым</h2>
+    <div class="entry-list">
+        {% if not entries %}
+            <p>Сіз әлі ешқандай жазба қалдырмадыңыз.</p>
+        {% endif %}
+        {% for entry in entries %}
+            <div class="entry-item">
+                <p class="entry-mood">{{ entry['mood'] }}</p>
+                <p class="entry-notes">{{ entry['notes'] }}</p>
+                <small class="entry-date">{{ entry['created_at'].split(' ')[0] }}</small>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

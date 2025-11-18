@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block title %}Аноним сұрақ-жауап{% endblock %}
+
+{% block content %}
+    <h1>Аноним сұрақ-жауап</h1>
+    <p>Сұрағыңызды толық анонимді түрде қойыңыз. Ешкім сіздің кім екеніңізді білмейді.</p>
+
+    <form method="post" class="card-form">
+        <label for="question">Сізді не мазалайды?</label>
+        <textarea name="question" id="question" rows="5" placeholder="Сұрағыңызды осында жазыңыз..." required></textarea>
+        <button type="submit" class="cta-button">Сұрақты жіберу</button>
+    </form>
+
+    <hr>
+
+    <h2>Басқа сұрақтар мен жауаптар</h2>
+    <div class="qa-list">
+        {% if not questions %}
+            <p>Әзірге ешкім сұрақ қоймады. Бірінші болыңыз!</p>
+        {% endif %}
+        {% for q in questions %}
+            <div class="qa-item">
+                <p class="question"><strong>Сұрақ:</strong> {{ q['question_text'] }}</p>
+                {% if q['answer_text'] %}
+                    <p class="answer"><strong>Жауап:</strong> {{ q['answer_text'] }}</p>
+                {% else %}
+                    <p class="answer"><em>Маманның жауабы күтілуде...</em></p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

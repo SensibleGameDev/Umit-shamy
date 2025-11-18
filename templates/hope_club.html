@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% block title %}Үміт шамы клубы{% endblock %}
+
+{% block content %}
+    <h1>Үміт шамы клубы</h1>
+    <p>Бұл - бір-бірімізге қолдау көрсетіп, жақсылық жасайтын орын.</p>
+
+    <!-- "Шам жағу" және Лидерлер тақтасы -->
+    <div class="support-grid">
+        <div class="support-card candle-section">
+            <h2>"Үміт шамын" жағыңыз!</h2>
+            <p>Басқа оқушыларға қолдау білдіріп, "шам" жағыңыз. Әрбір шам - бұл біздің ортақ үмітіміз.</p>
+            <div class="candle-count">
+                Жағылған шамдар саны: <strong>{{ total_candles }}</strong> 🔥
+            </div>
+            <form method="post" class="candle-form">
+                <input type="hidden" name="form_type" value="candle">
+                <label for="supporter_name">Атыңыз (немесе "Аноним"):</label>
+                <input type="text" name="supporter_name" id="supporter_name" placeholder="Аноним">
+                <button type="submit" class="cta-button small-button">Қолдау "шамын" жағу</button>
+            </form>
+        </div>
+
+        <div class="support-card">
+            <h2>Топ-лидер тақтасы 🏆</h2>
+            <p>Ең көп қолдау хаттарын қалдырған оқушылар:</p>
+            <ol class="leaderboard">
+                {% if not leaders %}
+                    <li><em>Әзірге ешкім тіркелмеді.</em></li>
+                {% endif %}
+                {% for leader in leaders %}
+                    <li>{{ leader['sender_name'] }} ({{ leader['letter_count'] }} хат)</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Қолдау хаттары -->
+    <h2>Оқушылардың бір-біріне қолдау хаттары</h2>
+    
+    <div class="support-grid">
+        <!-- Хат қалдыру формасы -->
+        <div class="support-card">
+            <h3>Досыңа немесе басқа оқушыға хат қалдыр:</h3>
+            <form method="post" class="card-form" style="padding: 0; box-shadow: none;">
+                <input type="hidden" name="form_type" value="letter">
+                <label for="sender_name">Сіздің атыңыз (немесе "Аноним"):</label>
+                <input type="text" name="sender_name" id="sender_name" placeholder="Аноним">
+                
+                <label for="message">Қолдау сөздеріңіз:</label>
+                <textarea name="message" id="message" rows="5" placeholder="Сен кереметсің! Бәрі жақсы болады!" required></textarea>
+                <button type="submit" class="cta-button">Хатты жіберу</button>
+            </form>
+        </div>
+
+        <!-- Хаттар тізімі -->
+        <div class="letter-list">
+            {% if not letters %}
+                <p>Әзірге ешқандай хат жоқ. Бірінші болып жазыңыз!</p>
+            {% endif %}
+            {% for letter in letters %}
+                <div class="letter-item">
+                    <p>"{{ letter['message'] }}"</p>
+                    <small>— {{ letter['sender_name'] }}</-small>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <hr>
+    <h2>Қолдау көрсеткен оқушылар тарихы</h2>
+    <div class="support-card">
+        <p>Бұл бөлімде басқаларға көмектескен немесе мейірімділік танытқан оқушылар туралы оқиғалар болады. (Бөлім әзірленуде)</p>
+    </div>
+
+{% endblock %}
