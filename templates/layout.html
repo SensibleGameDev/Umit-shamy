@@ -21,6 +21,7 @@
                 <li><a href="{{ url_for('emotional_support') }}">Эмоциялық қолдау</a></li>
                 <li><a href="{{ url_for('support_wall') }}">Қолдау қабырғасы</a></li>
                 <li><a href="{{ url_for('psychological_support') }}">Психологиялық қолдау</a></li>
+                <!-- ЖАҢА: SOS Батырмасы -->
                 <li><a href="{{ url_for('urgent_help') }}" class="sos-nav-btn">SOS 🆘</a></li>
             </ul>
         </nav>
@@ -30,11 +31,8 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- --- ЧАТ-БОТ ВИДЖЕТІ --- -->
-    <button id="chat-toggle-btn" class="chat-toggle-btn">
-        💬 Көмекші "Үміт"
-    </button>
-
+    <!-- ЧАТ-БОТ ВИДЖЕТІ (Өзгеріссіз) -->
+    <button id="chat-toggle-btn" class="chat-toggle-btn">💬 Көмекші "Үміт"</button>
     <div id="chat-widget" class="chat-widget hidden">
         <div class="chat-header">
             <div class="chat-title">
@@ -44,16 +42,13 @@
             <button id="chat-close-btn" class="chat-close-btn">&times;</button>
         </div>
         <div id="chat-messages" class="chat-messages">
-            <div class="message bot-message">
-                Сәлем! Менің атым - Үміт. Саған қалай көмектесе аламын? Көңіл-күйің қалай?
-            </div>
+            <div class="message bot-message">Сәлем! Менің атым - Үміт. Саған қалай көмектесе аламын? Көңіл-күйің қалай?</div>
         </div>
         <div class="chat-input-area">
             <input type="text" id="chat-input" placeholder="Хабарлама жазыңыз..." autocomplete="off">
             <button id="chat-send-btn">➤</button>
         </div>
     </div>
-    <!-- --- ЧАТ-БОТ АЯҚТАЛДЫ --- -->
 
     <footer>
         <div class="container">
@@ -61,8 +56,8 @@
         </div>
     </footer>
 
-    <!-- JAVASCRIPT -->
     <script>
+        // Чат-бот скрипті (Сол қалпында)
         const toggleBtn = document.getElementById('chat-toggle-btn');
         const closeBtn = document.getElementById('chat-close-btn');
         const chatWidget = document.getElementById('chat-widget');
@@ -70,77 +65,45 @@
         const chatInput = document.getElementById('chat-input');
         const messagesContainer = document.getElementById('chat-messages');
 
-        // Чатты ашу/жабу
-        toggleBtn.addEventListener('click', () => {
-            chatWidget.classList.remove('hidden');
-            toggleBtn.classList.add('hidden');
-            chatInput.focus();
-        });
+        toggleBtn.addEventListener('click', () => { chatWidget.classList.remove('hidden'); toggleBtn.classList.add('hidden'); chatInput.focus(); });
+        closeBtn.addEventListener('click', () => { chatWidget.classList.add('hidden'); toggleBtn.classList.remove('hidden'); });
 
-        closeBtn.addEventListener('click', () => {
-            chatWidget.classList.add('hidden');
-            toggleBtn.classList.remove('hidden');
-        });
-
-        // Хабарлама қосу функциясы
         function addMessage(text, sender) {
             const div = document.createElement('div');
             div.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
             div.textContent = text;
             messagesContainer.appendChild(div);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Төменге айналдыру
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Хабарлама жіберу
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
-
-            // 1. Пайдаланушы хабарламасын көрсету
             addMessage(text, 'user');
             chatInput.value = '';
-            chatInput.disabled = true; // Жауап келгенше бұғаттау
-
-            // "Жазып жатыр..." индикаторын қосуға болады (опционалды)
+            chatInput.disabled = true;
             const loadingDiv = document.createElement('div');
             loadingDiv.classList.add('message', 'bot-message', 'loading');
             loadingDiv.textContent = '...';
             messagesContainer.appendChild(loadingDiv);
 
             try {
-                // 2. Серверге (API) жіберу
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: text })
                 });
-
                 const data = await response.json();
-                
-                // Loading-ді өшіру
                 messagesContainer.removeChild(loadingDiv);
-
-                // 3. Бот жауабын көрсету
-                if (data.reply) {
-                    addMessage(data.reply, 'bot');
-                } else {
-                    addMessage('Қате шықты.', 'bot');
-                }
-
+                if (data.reply) { addMessage(data.reply, 'bot'); } 
+                else { addMessage('Қате шықты.', 'bot'); }
             } catch (error) {
                 messagesContainer.removeChild(loadingDiv);
                 addMessage('Байланыс қатесі. Қайта көріңіз.', 'bot');
-            } finally {
-                chatInput.disabled = false;
-                chatInput.focus();
-            }
+            } finally { chatInput.disabled = false; chatInput.focus(); }
         }
-
         sendBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
     </script>
 </body>
-
 </html>
