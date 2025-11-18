@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}Жедел көмек{% endblock %}
+
+{% block content %}
+    <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <h1 style="color: #e63946;">SOS: Жедел көмек</h1>
+        <p>Сізге дәл қазір қиын болып тұр ма? Бұл хат <strong>анонимді</strong> түрде тікелей мектеп психологының жеке поштасына түседі.</p>
+        <p>Ойыңызды, қорқынышыңызды немесе не болып жатқанын ашық жазыңыз.</p>
+        
+        <form method="post" class="card-form" style="border: 2px solid #e63946;">
+            <label for="message" style="color: #e63946;">Не болды? (Анонимді хабарлама)</label>
+            <textarea name="message" id="message" rows="6" placeholder="Менің басымнан мынадай жағдай өтіп жатыр..." required style="border-color: #ffcccc;"></textarea>
+            
+            <button type="submit" class="cta-button" style="background-color: #e63946; width: 100%; font-size: 1.2rem;">🆘 Психологқа жіберу</button>
+        </form>
+        
+        <p style="margin-top: 20px; font-size: 0.9rem; color: #777;">
+            Егер бұл өмірге қауіп төндіретін жағдай болса, өтінеміз, 112 немесе 150 (сенім телефоны) нөміріне хабарласыңыз.
+        </p>
+    </div>
+{% endblock %}

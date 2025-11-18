@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block title %}Хабарлама жіберілді{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; padding: 50px 0;">
+        <h1 style="color: #2a9d8f;">Хабарлама жіберілді! ✅</h1>
+        <p>Сіздің анонимді хатыңыз психологқа сәтті жөнелтілді.</p>
+        <p>Сіз жалғыз емессіз. Сабыр сақтаңыз, көмек міндетті түрде болады.</p>
+        
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('index') }}" class="cta-button">Басты бетке оралу</a>
+            <a href="{{ url_for('emotional_support') }}" class="cta-button" style="background-color: #e9c46a; margin-left: 10px;">Тынышталдыратын кеңестер оқу</a>
+        </div>
+    </div>
+{% endblock %}
