@@ -13,7 +13,7 @@ DEEPSEEK_API_KEY = "sk-71f366ac9de246808f01f673a48514ba"
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 
 SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
+SMTP_PORT = 465
 SENDER_EMAIL = "qplayzx@gmail.com"      
 SENDER_PASSWORD = "glym xpcw lujs zsqa"     
 PSYCHOLOGIST_EMAIL = "umsyn-bolatovna-777@mail.ru" 
@@ -68,7 +68,7 @@ def urgent_help():
             body = f"Сайттан анонимді SOS хабарлама келді:\n\nХабарлама: {message_body}\n\n---\nБұл автоматты хабарлама."
             msg.attach(MIMEText(body, 'plain'))
             server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-            server.starttls() # Қауіпсіз байланыс
+            #server.starttls() # Қауіпсіз байланыс
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             text = msg.as_string()
             server.sendmail(SENDER_EMAIL, PSYCHOLOGIST_EMAIL, text)
@@ -202,3 +202,4 @@ def chat_api():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
